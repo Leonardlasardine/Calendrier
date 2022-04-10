@@ -1,6 +1,8 @@
 package leonard.calendar;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class Calendar {
 
@@ -10,17 +12,17 @@ public class Calendar {
     private final int[] nbrDays = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
     //Today
-    private static int dayNbr ;
-    private static String dayTxt;
-    private static String monthTxt;
-    private static int year;
+    private int dayNbr;
+    private String dayTxt;
+    private int monthNbr ;
+    private String monthTxt;
+    private int year;
 
     public Calendar() {
         setToday();
-
     }
 
-    public static String today() {
+    public String today() {
         return dayTxt + " " + dayNbr + " " + monthTxt + " " + year;
     }
 
@@ -29,12 +31,74 @@ public class Calendar {
         LocalDate today = LocalDate.now();
 
         dayNbr = today.getDayOfMonth();
-        int monthNbr = today.getMonthValue();
+        monthNbr = today.getMonthValue();
         year = today.getYear();
 
         bissextile();
         dayTxt = listDay[dayToText(dayNbr, monthNbr, year)];
         monthTxt = listMonth[monthNbr - 1];
+    }
+    public String MonthToTxt(int number) {
+        return listMonth[number - 1];
+    }
+
+    public int getMonthNbr() {
+        return monthNbr;
+    }
+
+    public int getDayNbr() {
+        return dayNbr;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public int[] array(int m, int y) {
+        ArrayList<Integer> boxes = new ArrayList<>(boxesBefore(m, y));
+
+        for (int i = 0; i < nbrDays[m - 1]; i++) {
+            boxes.add(i +1);
+        }
+
+        //Cases du mois d'après
+        int j = 1;
+        while (boxes.size() < 42) {
+            boxes.add(j);
+            j++;
+        }
+
+        int[] list = new int[boxes.size()];
+
+        //Conversion en tableau fini
+        for(int i = 0; i < boxes.size(); i++) {
+            list[i] = boxes.get(i);
+        }
+
+        return list;
+    }
+
+    private ArrayList<Integer> boxesBefore(int m, int y) {
+        //Cases du mois d'avant
+        int dayFirst = dayToText(1, m, y);
+
+        //Pour janvier
+        int i;
+        if (m != 1) { //1 ou 0
+            i = nbrDays[m -2] + 1;
+        } else {
+            i = nbrDays[11] + 1;
+        }
+
+        ArrayList<Integer> daysBefore = new ArrayList<>();
+
+        while (dayFirst > 0) {
+            dayFirst -= 1;
+            i--;
+            daysBefore.add(i);
+        }
+        Collections.reverse(daysBefore);
+        return daysBefore;
     }
 
     private void bissextile() {
@@ -49,7 +113,7 @@ public class Calendar {
         boolean bissextile = false;
 
         if (checkYear < 2000) {
-            General.errorMessageText("La date doit être antérieur au 1er janvier 2000.", true);
+            General.errorMessageText("La date doit être antérieur au 1er janvier 2000.", 1);
         }
 
         if (checkYear%4 == 0) {
@@ -64,16 +128,16 @@ public class Calendar {
         return bissextile;
     }
 
-    private int dayToText(int d,int m,int y) {
+    private int dayToText(int d, int m, int y) {
         int day = 5; //Le 1er janvier 2000 était un samedi (j = 5)
         int month = 1;
         int year = 2000;
 
         if (m > 12) {
-            General.errorMessageText("Il ne peut pas avoir plus de douze mois dans une année", true);
+            General.errorMessageText("Il ne peut pas avoir plus de douze mois dans une année", 1);
         }
         if (d > nbrDays[m - 1]) {
-            General.errorMessageText("Il n'y a pas plus de " + nbrDays[m - 1] + " jours en " + listMonth[m -1] + ".", true);
+            General.errorMessageText("Il n'y a pas plus de " + nbrDays[m - 1] + " jours en " + listMonth[m -1] + ".", 1);
         }
 
         while (year < y) {
